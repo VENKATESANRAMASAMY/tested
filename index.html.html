@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Combined Memory Tasks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: #e8eefc;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { margin-bottom: 15px; }
+        .task-container { display: none; margin-top: 20px; }
+        .active { display: block; }
+        button.switchBtn {
+            padding: 10px 20px; margin: 5px;
+            border-radius: 8px; border:none;
+            cursor:pointer; background:#1e2a48; color:white;
+        }
+        button.switchBtn.active { background:#3b82f6; }
+
+        /* Shared button style */
+        button { font-family: inherit; }
+
+        /* --- 2-Back Styles --- */
+        .wrap { width:min(900px,95vw); margin:auto; }
+        .card { background:linear-gradient(160deg, #0e1730, #0b142e); border:1px solid #1c2748; border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+        .center { text-align:center; }
+        .btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+        button.primary { background:#3b82f6; border:1px solid #315fd0; color:white; border-radius:12px; }
+        button.good { background:#22c55e; border-radius:12px; color:white; }
+        button.warn { background:#f59e0b; border-radius:12px; color:white; }
+        .stim { display:grid; place-items:center; height:120px; font-size:80px; font-weight:800; background:#0b142e; border:1px dashed #23325d; border-radius:16px; user-select:none; }
+        .row { display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap; }
+        .stat { flex:1; min-width:80px; background:#0b1226; border:1px solid #1e2a4e; border-radius:12px; padding:12px; text-align:center; }
+        .label { color:#9fb0d1; font-size:13px; }
+        .value { font-size:20px; font-weight:800; }
+        .msg { text-align:center; min-height:28px; margin-top:8px; font-weight:700; }
+        .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0c1430; border:1px solid #22325d; padding:2px 6px; border-radius:6px; }
+        .hidden { display:none; }
+
+        /* --- Digit Span Styles --- */
+        #digitBox { font-size:48px; margin:20px; color:#ffcc00; }
+        #keypad button { font-size:24px; margin:8px; width:60px; height:60px; border-radius:10px; border:none; background:#1e2a48; color:white; cursor:pointer; }
+        #inputBox { font-size:28px; margin:15px; letter-spacing:5px; }
+        #message { margin-top:20px; font-size:22px; }
+        #instructions { max-width:600px; margin:auto; padding:15px; background:#1a2442; border-radius:12px; font-size:18px; margin-bottom:20px; }
+
+        /* --- Tower of Hanoi Styles --- */
+        #task3 h2 { margin-bottom: 10px; }
+        #playBtn, #startGameBtn { background: green; color: white; border-radius:8px; }
+        #finishBtn { background: red; color: white; display: none; border-radius:8px; }
+        #instructionsHanoi { display:none; background:#1a2442; border-radius:12px; padding:15px; max-width:600px; margin:15px auto; }
+        .towers {
+            display: flex; justify-content: center;
+            margin-top: 20px; display: none;
+        }
+        .tower {
+            width: 100px; height: 300px;
+            background: #111; border: 2px solid orange;
+            border-radius: 8px; margin: 0 20px;
+            display: flex; flex-direction: column-reverse; align-items: center; padding: 5px;
+        }
+        .disk {
+            height: 25px; border-radius: 5px; text-align: center;
+            color: white; font-weight: bold; margin: 3px 0; cursor: grab;
+        }
+        .disk1 { width: 40px; background: gold; }
+        .disk2 { width: 70px; background: limegreen; }
+        .disk3 { width: 100px; background: cyan; }
+        .disk4 { width: 130px; background: blue; }
+    </style>
+</head>
+<body>
+<h1>Memory Tasks</h1>
+<div>
+    <button class="switchBtn active" onclick="showTask('task1', this)">2-Back Task</button>
+    <button class="switchBtn" onclick="showTask('task2', this)">Digit Span Test</button>
+    <button class="switchBtn" onclick="showTask('task3', this)">Tower of Hanoi</button>
+</div>
+
+<!-- 2-Back Task -->
+<div id="task1" class="task-container active">
+    <div class="wrap">
+        <div id="screenIntro" class="card center">
+            <h1>2-Back Task Instructions</h1>
+            <p>This task tests your working memory...</p>
+            <div class="btns"><button id="startBtn" class="primary">Start Task</button></div>
+        </div>
+        <div id="screenTask" class="card hidden">
+            <div class="row" style="margin-bottom:12px">
+                <div class="stat"><div class="label">Time</div><div id="timeVal" class="value">120</div></div>
+                <div class="stat"><div class="label">Targets</div><div id="targetsVal" class="value">0</div></div>
+                <div class="stat"><div class="label">Hits</div><div id="hitsVal" class="value">0</div></div>
+            </div>
+            <div class="stim" id="stimulus">—</div>
+            <div class="msg" id="feedback"></div>
+            <div class="btns">
+                <button id="matchBtn" class="good">Match (SPACE)</button>
+                <button id="resetBtn" class="warn">Reset</button>
+            </div>
+        </div>
+        <div id="screenDone" class="card center hidden">
+            <h1>Finished!</h1>
+            <p id="summary" style="font-size:18px"></p>
+            <div class="btns"><button id="againBtn" class="primary">Run Again</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Digit Span Task -->
+<div id="task2" class="task-container">
+    <h2>Digit Span Test</h2>
+    <div id="instructions">
+        <p>This task tests your short-term memory...</p>
+    </div>
+    <div id="digitBox"></div>
+    <div id="inputBox"></div>
+    <div id="keypad"></div>
+    <button id="startBtn2">Start Task</button>
+    <div id="message"></div>
+</div>
+
+<!-- Tower of Hanoi Task -->
+<div id="task3" class="task-container">
+    <h2>🎮 Tower of Hanoi 🎮</h2>
+    <div id="playOption"><button id="playBtn">Play Game</button></div>
+    <div id="instructionsHanoi">
+        <p>Instructions:</p>
+        <ul>
+            <li>Drag and drop disks to arrange them on the rightmost tower.</li>
+            <li>Only place smaller disks on top of larger disks.</li>
+            <li>Click Finish when done to see your total moves.</li>
+        </ul>
+        <button id="startGameBtn">Start Game</button>
+    </div>
+    <p id="messageHanoi" style="display:none;">Arrange the disks from smallest to largest on the rightmost tower.</p>
+    <p id="moves" style="display:none;">Moves: 0</p>
+    <button id="finishBtn">Finish</button>
+    <div class="towers" id="gameTowers">
+        <div class="tower" id="tower1"></div>
+        <div class="tower" id="tower2"></div>
+        <div class="tower" id="tower3"></div>
+    </div>
+</div>
+
+<script>
+    // ---------- Task Switching ----------
+    function showTask(taskId, btn) {
+        document.querySelectorAll('.task-container').forEach(t => t.classList.remove('active'));
+        document.getElementById(taskId).classList.add('active');
+        document.querySelectorAll('.switchBtn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // ---------- 2-Back Task ----------
+    (function(){
+        const TARGET_PROB = 0.30, ON_MS = 1200, ISI_MS = 800, N = 2, GAME_TIME = 120000;
+        const screenIntro = document.getElementById('screenIntro'), screenTask = document.getElementById('screenTask'), screenDone = document.getElementById('screenDone');
+        const startBtn = document.getElementById('startBtn'), matchBtn = document.getElementById('matchBtn'), resetBtn = document.getElementById('resetBtn'), againBtn = document.getElementById('againBtn');
+        const stimEl = document.getElementById('stimulus'), feedbackEl = document.getElementById('feedback');
+        const timeVal = document.getElementById('timeVal'), targetsVal = document.getElementById('targetsVal'), hitsVal = document.getElementById('hitsVal'), summaryEl = document.getElementById('summary');
+        const LETTERS = Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        let seq=[], isTarget=[], step=0, running=false, respondedThisStep=false, timerId=null, timeLeft=GAME_TIME;
+        let targets=0,hits=0,misses=0,falseAlarms=0;
+        function showIntro(){ screenIntro.classList.remove('hidden'); screenTask.classList.add('hidden'); screenDone.classList.add('hidden'); }
+        function showTaskScreen(){ screenIntro.classList.add('hidden'); screenTask.classList.remove('hidden'); screenDone.classList.add('hidden'); }
+        function showDone(){ screenIntro.classList.add('hidden'); screenTask.classList.add('hidden'); screenDone.classList.remove('hidden'); }
+        function updateStats(){ timeVal.textContent=Math.ceil(timeLeft/1000); targetsVal.textContent=targets; hitsVal.textContent=hits; }
+        function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+        function nextLetter(){ let newLetter; if(step>=N && Math.random()<TARGET_PROB){ newLetter=seq[step-N]; isTarget.push(true); targets++; } else { do{ newLetter=sample(LETTERS);} while(step>=N && newLetter===seq[step-N]); isTarget.push(false);} seq.push(newLetter); }
+        function startTaskFunc(){ if(running)return; running=true; step=0; seq=[]; isTarget=[]; targets=hits=misses=falseAlarms=0; timeLeft=GAME_TIME; feedbackEl.textContent=''; showTaskScreen(); tick(); timerId=setInterval(()=>{timeLeft-=1000; updateStats(); if(timeLeft<=0) finish();},1000);}
+        function respond(){ if(!running||respondedThisStep)return; respondedThisStep=true; const target=isTarget[step]; if(target){ hits++; feedbackEl.textContent='✅ Correct'; feedbackEl.style.color='#22c55e'; } else { falseAlarms++; feedbackEl.textContent='❌ False alarm'; feedbackEl.style.color='#ef4444'; } updateStats(); }
+        function finish(){ running=false; clearInterval(timerId); showDone(); const acc=targets?Math.round((hits/targets)*100):0; summaryEl.innerHTML=`Targets: <b>${targets}</b> | Hits: <b>${hits}</b> | Misses: <b>${misses}</b> | False Alarms: <b>${falseAlarms}</b><br>Accuracy: <b>${acc}%</b>`; }
+        function tick(){ if(!running||timeLeft<=0)return; nextLetter(); stimEl.textContent=seq[step]; respondedThisStep=false; setTimeout(()=>{ stimEl.textContent=''; if(isTarget[step]&&!respondedThisStep) misses++; step++; setTimeout(tick,ISI_MS);},ON_MS);}
+        function resetAll(){ running=false; clearInterval(timerId); stimEl.textContent='—'; feedbackEl.textContent=''; showIntro(); }
+        startBtn.addEventListener('click',startTaskFunc); matchBtn.addEventListener('click',respond); resetBtn.addEventListener('click',resetAll); againBtn.addEventListener('click',()=>{ resetAll(); startTaskFunc(); });
+        document.addEventListener('keydown',(e)=>{ if(e.code==='Space'){ e.preventDefault(); running?respond():startTaskFunc(); } });
+        showIntro();
+    })();
+
+    // ---------- Digit Span Task ----------
+    (function(){
+        const digitBox=document.getElementById("digitBox"), inputBox=document.getElementById("inputBox"), keypad=document.getElementById("keypad"), message=document.getElementById("message"), startBtn2=document.getElementById("startBtn2");
+        let sequence=[], userInput="", currentChance=0; const maxChances=3;
+        for(let i=0;i<=9;i++){ const btn=document.createElement("button"); btn.textContent=i; btn.onclick=()=>{userInput+=i; inputBox.textContent=userInput;}; keypad.appendChild(btn);} const submitBtn=document.createElement("button"); submitBtn.textContent="Submit"; submitBtn.onclick=checkAnswer; keypad.appendChild(submitBtn);
+        startBtn2.onclick=()=>{ startBtn2.style.display="none"; document.getElementById("instructions").style.display="none"; startGame(); };
+        function startGame(){ sequence=[]; userInput=""; inputBox.textContent=""; message.textContent=""; generateSequence(); showSequence();}
+        function generateSequence(){ sequence=[]; for(let i=0;i<4;i++){ sequence.push(Math.floor(Math.random()*10)); } }
+        function showSequence(){ let i=0; digitBox.textContent=""; keypad.style.display="none"; const interval=setInterval(()=>{ if(i<sequence.length){ digitBox.textContent=sequence[i]; i++; } else{ clearInterval(interval); digitBox.textContent=""; keypad.style.display="block"; } },1000); }
+        function checkAnswer(){ if(userInput===sequence.join("")){ message.textContent="✅ Correct! Well done!"; keypad.style.display="none"; } else { currentChance++; if(currentChance<maxChances){ message.textContent=`❌ Wrong! New sequence will appear (Chance ${currentChance}/${maxChances})`; userInput=""; inputBox.textContent=""; setTimeout(startGame,1500);} else { message.textContent="❌ Game Over!"; keypad.style.display="none"; } } }
+    })();
+
+    // ---------- Tower of Hanoi Task ----------
+    (function(){
+        const playBtn=document.getElementById('playBtn'), startGameBtn=document.getElementById('startGameBtn'), finishBtn=document.getElementById('finishBtn');
+        const playOption=document.getElementById('playOption'), instructions=document.getElementById('instructionsHanoi'), message=document.getElementById('messageHanoi'), movesText=document.getElementById('moves'), towers=document.querySelectorAll('.tower'), gameTowers=document.getElementById('gameTowers');
+        let moves=0, draggedDisk=null; const diskClasses=['disk1','disk2','disk3','disk4'];
+        function createDisks(){ towers.forEach(t=>t.innerHTML=''); let disks=diskClasses.map((cls,i)=>{ let disk=document.createElement('div'); disk.classList.add('disk',cls); disk.textContent=i+1; disk.draggable=true; return disk; }); disks.forEach(disk=>{ let towerIndex; do{ towerIndex=Math.floor(Math.random()*3);} while(towers[towerIndex].children.length>2); towers[towerIndex].appendChild(disk);}); }
+        document.addEventListener('dragstart',(e)=>{ if(e.target.classList.contains('disk')){ draggedDisk=e.target; e.dataTransfer.setData('text/plain',''); } });
+        document.addEventListener('dragover',(e)=>e.preventDefault());
+        towers.forEach(tower=>{ tower.addEventListener('drop',(e)=>{ e.preventDefault(); let topDisk=tower.lastElementChild; if(!topDisk||parseInt(draggedDisk.textContent)<parseInt(topDisk.textContent)){ tower.appendChild(draggedDisk); moves++; movesText.textContent="Moves: "+moves; } draggedDisk=null; }); });
+        finishBtn.addEventListener('click',()=>{ message.textContent=`🎉 Game Over! You made ${moves} moves.`; document.querySelectorAll('.disk').forEach(d=>d.draggable=false); finishBtn.style.display='none'; });
+        playBtn.addEventListener('click',()=>{ playOption.style.display='none'; instructions.style.display='block'; });
+        startGameBtn.addEventListener('click',()=>{ instructions.style.display='none'; message.style.display='block'; movesText.style.display='block'; gameTowers.style.display='flex'; finishBtn.style.display='inline-block'; moves=0; movesText.textContent="Moves: 0"; createDisks(); });
+    })();
+</script>
+</body>
+</html>
+
